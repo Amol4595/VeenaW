@@ -37,7 +37,7 @@ import { environment } from '../../environments/environment';
               type : "Feature",
               properties: {
                 
-                title : '2',
+                title : '3',
                 text  : 'Delhi ',
                 days  : '2 nights'
               },
@@ -49,8 +49,8 @@ import { environment } from '../../environments/environment';
             {
               type: "Feature",
               properties: {
-      
-                title : '1',
+                
+                title : '3',
                 text  : 'Agra ',
                 days  : '1 night'
               },
@@ -64,7 +64,7 @@ import { environment } from '../../environments/environment';
               type : "Feature",
               properties : {
                 
-                title : '1',
+                title : '3',
                 text  : 'Ranthambore',
                 days  : '1 nights'
               },
@@ -128,14 +128,33 @@ import { environment } from '../../environments/environment';
       id     : 'location',
       type   : 'circle',
       source : 'points',
-      filter : ['==', '$type', 'Point'],
       paint  : {
        'circle-color': 'black',
        'circle-stroke-width':10,
        'circle-stroke-color':'black',
-       'circle-radius': 2  
+       'circle-radius': 2,
+
       }
   });
+
+    this.map.addLayer({
+      id: 'points',
+      type: 'symbol',
+      source: 'points',
+      layout: {
+       'text-field' : ['get', 'text'],
+       'text-size'  : 17,
+       'text-font'  : [ 'Open Sans Semibold', 'Arial Unicode MS Bold'  ],
+       'text-offset': [0, 1.25],
+       'text-anchor': 'top'
+    },
+      paint: {
+       'text-color': '#fa051d',
+       'text-halo-color': '#fff',
+       'text-halo-width': 2
+    }
+    });
+
      
       
     this.map.addLayer({
@@ -144,7 +163,8 @@ import { environment } from '../../environments/environment';
       source : 'points',
       paint: {
        'line-color': '#00008B',
-       'line-width': 2,
+       'line-width': 3,
+       'line-opacity': 0.6
       }
   });
 
@@ -154,8 +174,8 @@ import { environment } from '../../environments/environment';
     if(res.length)
     {
       const popup = new mapboxgl.Popup({closeButton:false});
-      const data = res[0]?.properties?.text;
-      const data2= res[0]?.properties?.days;
+      const data = res[1]?.properties?.text;
+      const data2= res[1]?.properties?.days;
       popup.setLngLat(event.lngLat).setHTML(`<h2>${data}</h2>
       <span>${data2}</span>`).addTo(this.map);
     }
