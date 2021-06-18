@@ -1,3 +1,4 @@
+
 import { Component, OnInit } from "@angular/core";
 import * as mapboxgl from "mapbox-gl";
 import { environment } from "../../environments/environment";
@@ -7,6 +8,7 @@ import { environment } from "../../environments/environment";
   templateUrl: "./maps.component.html",
   styleUrls: ["./maps.component.css"]
 })
+
 export class MapsComponent implements OnInit {
   map: mapboxgl.Map;
   style = "mapbox://styles/mapbox/light-v10";
@@ -19,11 +21,12 @@ export class MapsComponent implements OnInit {
       container: "map",
       style: this.style,
       center: [77.0685, 28.7186],
-      zoom: 7,
-      minZoom: 1.5
+      zoom: 3.5,
+      minZoom: 1.9
     });
 
     this.map.on("load", () => {
+      this.map.setLayoutProperty('settlement-label', 'visibility', 'none')
       this.map.addControl(new mapboxgl.NavigationControl());
       this.map.addSource("points", {
         type: "geojson",
@@ -32,12 +35,13 @@ export class MapsComponent implements OnInit {
           features: [
             {
               type: "Feature",
+              id: 1,
               properties: {
                 title: "3",
                 text: "Delhi ",
                 days: "2 nights",
-                name: 'circle1',
-
+                id:1
+      
               },
               geometry: {
                 type: "Point",
@@ -46,11 +50,13 @@ export class MapsComponent implements OnInit {
             },
             {
               type: "Feature",
+              id:2,
               properties: {
                 title: "3",
                 text: "Agra ",
                 days: "1 night",
-                name: 'circle1'
+                name: 'circle1',
+                id:2
               },
               geometry: {
                 type: "Point",
@@ -59,11 +65,14 @@ export class MapsComponent implements OnInit {
             },
             {
               type: "Feature",
+              id:3,
               properties: {
                 title: "3",
                 text: "Ranthambore",
                 days: "1 nights",
-                name: 'circle1'
+                name: 'circle2',
+                id:3
+               
               },
               geometry: {
                 type: "Point",
@@ -72,17 +81,20 @@ export class MapsComponent implements OnInit {
             },
             {
               type: "Feature",
+              id:4,
               properties: {
-                title: "3",
                 text: "Jaipur",
                 days: "3 nights",
-                name: 'circle1'
+                id:4,
+               
               },
               geometry: {
                 type: "Point",
                 coordinates: [75.78737, 26.9124]
               }
             },
+            
+           
             {
               type: "Feature",
               properties: {},
@@ -92,61 +104,81 @@ export class MapsComponent implements OnInit {
       
                   [78.0081, 27.1767],
                   [76.5026, 26.0173],
-                  [75.78737, 26.9124]
+                  [75.78737, 26.9124],
+                  
                 ]
               }
             },
+            
             
           ]
         }
       });
 
-      this.map.addLayer({
-        id: "location",
+    this.map.addLayer({
+        id: "circle_layer",
         type: "circle",
         source: "points",
+       
         paint: {
           "circle-color": "black",
-          "circle-stroke-width": 10,
+          "circle-stroke-width": 15,
           "circle-stroke-color": "black",
-          "circle-radius": 2,
-          'circle-opacity': 0.5,
-         
+          "circle-radius": 0,
+          'circle-opacity': 1,
+            
         }
-      });
+      })
       
-   /*   this.map.addLayer({
-        'id': 'location_hover',
-        'type': 'circle',
-        'source': 'points',     
-        'paint': {
-            'circle-radius': 2,
-            'circle-opacity': 0.5,
-            'circle-stroke-color': '#FF6666',
-            'circle-stroke-width': 4,
-            'circle-color': '#6666FF'
-        },
-        "filter": ["==", "name", ""]
-  });
+    this.map.addLayer({
+        id   : 'circle_layer_hover',
+        type : 'circle',
+        source : 'points',     
+        paint : {
+           'circle-radius': 0,
+           'circle-opacity': 1,
+           'circle-stroke-color': 'red',
+           'circle-stroke-width': 15,
+           'circle-color': 'red'
+       },
+       filter: ["==", "id", ""],
+ });
+    const popup = new mapboxgl.Popup({
+          closeButton: false,
+          closeOnClick: false
+          });
 
-      this.map.on("mousemove", "location", (e) => {
-        this.map.getCanvas().style.cursor = 'pointer';
-      this. map.setFilter("location_hover", ["==", "name",e?.features[0]?.properties?.name]);
+    this.map.on("mousemove", "circle_layer", (e:any) => {
+    this.map.getCanvas().style.cursor = 'pointer';
+    const res = e.features;
+    const finalRes = res.filter((item:any) => item?.properties?.id || false);
+    this.map.setFilter("circle_layer_hover", ["==", "id",finalRes[0]?.properties?.id]);
+    const coordinates = finalRes[0].geometry.coordinates.slice();
+    const data  = finalRes[0]?.properties?.text;
+    const data2 = finalRes[0]?.properties?.days;
+    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+        }
+    popup.setLngLat(coordinates).setHTML(
+        `<h2>${data}</h2>
+        <span>${data2}</span>`
+        ).addTo(this.map);
+     
+    
     });
 
-
-      this.map.on("mouseleave", "location", () => {
-        this.map.getCanvas().style.cursor = '';
-        this.map.setFilter("location_hover", ["==", "name", ""]);
-    });
-*/
-      this.map.addLayer({
+    this.map.on("mouseleave", "circle_layer", () => {
+    this.map.getCanvas().style.cursor = '';
+    this.map.setFilter("circle_layer_hover", ["==", "id", ""]);
+    popup.remove();
+   });
+    this.map.addLayer({
         id: "points",
         type: "symbol",
         source: "points",
         layout: {
           "text-field": ["get", "text"],
-          "text-size": 17,
+          "text-size": 12,
           "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
           "text-offset": [0, 1.25],
           "text-anchor": "top"
@@ -158,7 +190,7 @@ export class MapsComponent implements OnInit {
         }
       });
 
-      this.map.addLayer({
+    this.map.addLayer({
         id: "line",
         type: "line",
         source: "points",
@@ -168,31 +200,16 @@ export class MapsComponent implements OnInit {
         
           },
         paint: {
-          "line-color": "#00008B",
+          "line-color": "#2F4F4F",
           "line-width": 3,
           "line-opacity": 0.6,
         
         }
       });
-
-      this.map.on("click", (event) => {
-          const res = this.map.queryRenderedFeatures(event.point, { layers: ["location"]});
-          const finalRes = res.filter((item) => item?.properties?.days || false);
-        
-          if (finalRes.length) {
-              const popup = new mapboxgl.Popup({ closeButton: false });
-              const data  = finalRes[0]?.properties?.text;
-              const data2 = finalRes[0]?.properties?.days;
-              popup
-                .setLngLat(event.lngLat)
-                .setHTML(
-                  `<h2>${data}</h2>
-                <span>${data2}</span>`
-                )
-                .addTo(this.map);
-            }
-      });
     });
+    this.map.on('load',() =>{
+
+    })
 
     this.map.on("load", () => {
       this.map.loadImage(
@@ -207,6 +224,7 @@ export class MapsComponent implements OnInit {
             data: {
               type: "FeatureCollection",
               features: [
+                
                 {
                   type: "Feature",
                   properties: {},
@@ -217,32 +235,35 @@ export class MapsComponent implements OnInit {
                       [78.0081, 27.1767]
                     ]
                   }
-                }
+                },
+               
+        
+                
               ]
             }
           });
-
-          this.map.addLayer({
-            id: "aeroplane-layer",
-            type: "symbol",
-            source: "path",
-            layout: {
-              "symbol-placement": "line",
-              "symbol-spacing": 2,
-              "icon-allow-overlap": true,
-              "icon-image": "aeroplane",
-              "icon-size": 0.095,
-              visibility: "visible"
+          
+    this.map.addLayer({
+        id: "aeroplane-layer",
+        type: "symbol",
+        source: "path",
+        layout: {
+          "symbol-placement": "line",
+          "symbol-spacing": 2,
+          "icon-allow-overlap": true,
+          "icon-image": "aeroplane",
+          "icon-size": 0.095,
+           visibility: "visible"
             }
           });
-          this.map.addLayer({
-            'id': 'path',
-            'source': 'path',
-            'type': 'line',
-            'paint': {
-            'line-width': 2,
-            'line-color': '#000000',
-            'line-dasharray': [2, 1],
+    this.map.addLayer({
+          'id': 'path',
+          'source': 'path',
+          'type': 'line',
+          'paint': {
+          'line-width': 2.5,
+          'line-color': '#2F4F4F',
+          'line-dasharray': [2, 1],
             }
             });
         }

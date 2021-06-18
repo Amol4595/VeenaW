@@ -24,6 +24,8 @@
     "@types/geojson": "^7946.0.7",
     "@types/mapbox-gl": "^2.1.2",
     "arc": "^0.1.1",
+    "leaflet": "^1.7.1",
+    "leaflet-arc": "^1.0.2",
     "leaflet-routing-machine": "^3.2.12",
     "mapbox-gl": "^2.3.0",
     "rxjs": "~6.6.0",
