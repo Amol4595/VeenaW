@@ -12,6 +12,36 @@ export class MapsComponent implements OnInit {
   style = 'mapbox://styles/mapbox/light-v10';
   constructor() {
     (mapboxgl as typeof mapboxgl).accessToken = environment.mapbox.accessToken;
+    let data = [{
+      lat:123,
+      lng:123,
+      travmode:'plane/bus',
+      title: '3',
+      text: 'Agra ',
+      days: '1 night',
+      name: 'circle1',
+      id: 1,
+    },
+    {
+      lat:123,
+      lng:123,
+      travmode:'plane/bus',
+      title: '3',
+      text: 'Agra ',
+      days: '1 night',
+      name: 'circle1',
+      id: 2,
+    },
+    {
+      lat:123,
+      lng:123,
+      travmode:'plane/bus',
+      title: '3',
+      text: 'Agra ',
+      days: '1 night',
+      name: 'circle1',
+      id: 3,
+    }]
   }
 
   ngOnInit(): void {
@@ -19,7 +49,7 @@ export class MapsComponent implements OnInit {
       container: 'map',
       style: this.style,
       center: [77.0685, 28.7186],
-      zoom: 3.5,
+      zoom: 5,
       minZoom: 1.9,
     });
 
@@ -27,7 +57,7 @@ export class MapsComponent implements OnInit {
       this.map.setLayoutProperty('settlement-label', 'visibility', 'none');
       this.map.addControl(new mapboxgl.NavigationControl());
       //  adding geodata
-      this.map.addSource('points', {
+      this.map.addSource('route', {
         type: 'geojson',
         data: {
           type: 'FeatureCollection',
@@ -89,7 +119,6 @@ export class MapsComponent implements OnInit {
                 coordinates: [75.78737, 26.9124],
               },
             },
-
             {
               type: 'Feature',
               properties: {},
@@ -109,21 +138,24 @@ export class MapsComponent implements OnInit {
       this.map.addLayer({
         id: 'circle_layer',
         type: 'circle',
-        source: 'points',
-
+        source: 'route',
         paint: {
-          'circle-color': 'black',
-          'circle-stroke-width': 15,
-          'circle-stroke-color': 'black',
-          'circle-radius': 0,
-          'circle-opacity': 1,
+          // 'circle-color': 'black',
+          // 'circle-stroke-width': 15,
+          // 'circle-stroke-color': 'black',
+          // 'circle-radius': 0,
+          // 'circle-opacity': 1,
+          'circle-color': '#00b7bf',
+          'circle-radius': 8,
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#333',
         },
       });
      
       this.map.addLayer({
         id: 'circle_layer_hover',
         type: 'circle',
-        source: 'points',
+        source: 'route',
         paint: {
           'circle-radius': 0,
           'circle-opacity': 1,
@@ -165,7 +197,7 @@ export class MapsComponent implements OnInit {
           )
           .addTo(this.map);
       });
-       // removing popup on mouseleave
+      // removing popup on mouseleave
       this.map.on('mouseleave', 'circle_layer', () => {
         this.map.getCanvas().style.cursor = '';
         this.map.setFilter('circle_layer_hover', ['==', 'id', '']);
@@ -193,23 +225,20 @@ export class MapsComponent implements OnInit {
       this.map.addLayer({
         id: 'line',
         type: 'line',
-        source: 'points',
+        source: 'route',
         layout: {
           'line-join': 'round',
-          'line-cap': 'round',
+          'line-cap': 'round'
         },
         paint: {
-          'line-color': '#2F4F4F',
-          'line-width': 3,
-          'line-opacity': 0.6,
+          'line-color': '#3887be',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 12, 3, 22, 12]
         },
-      });
+      },'waterway-label');
     });
   
     this.map.on('load', () => {
-      this.map.loadImage(
-        'https://redbootsdotme.files.wordpress.com/2014/03/airplane-mode-on-icon-0926022143.png',
-        (error, image2) => {
+      this.map.loadImage('assets/airplane.png',(error, image2) => {
           if (error) throw error;
           type ImageProp = HTMLImageElement;
           const imageData = image2 as ImageProp;
@@ -245,7 +274,7 @@ export class MapsComponent implements OnInit {
               'icon-allow-overlap': true,
               'icon-image': 'aeroplane',
               'icon-size': 0.095,
-              visibility: 'visible',
+              'visibility': 'visible',
             },
           });
           // adda a layer to show dotted line for airway
@@ -254,11 +283,11 @@ export class MapsComponent implements OnInit {
             source: 'path',
             type: 'line',
             paint: {
-              'line-width': 2.5,
               'line-color': '#2F4F4F',
               'line-dasharray': [2, 1],
+              'line-width': ['interpolate', ['linear'], ['zoom'], 12, 3, 22, 12]
             },
-          });
+          },'waterway-label');
         }
       );
     });
